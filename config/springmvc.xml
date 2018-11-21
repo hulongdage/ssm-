@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:mvc="http://www.springframework.org/schema/mvc"
+		xmlns:context="http://www.springframework.org/schema/context" 
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+	        http://www.springframework.org/schema/beans/spring-beans.xsd
+	        http://www.springframework.org/schema/context
+	        http://www.springframework.org/schema/context/spring-context.xsd
+	        http://www.springframework.org/schema/mvc
+       	   http://www.springframework.org/schema/mvc/spring-mvc.xsd"><!-- 这是包括SpringMVC的配置 -->
+       	   
+       	   
+       	   <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"/><!-- 配置视图处理器 -->
+       	   <!-- 多部件视图解析器 -->
+       	   <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+       	   		<property name="maxUploadSize">
+       	   			<value>5242800</value>
+       	   		</property>
+       	   </bean>
+       	   <!-- 組件掃描 -->
+       	   <context:component-scan base-package="com.example.ssm.controller"></context:component-scan>
+       	   <!-- 配置校验器 -->
+       	   <mvc:annotation-driven validator="validator"></mvc:annotation-driven>
+       	   <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+       	   		<property name="providerClass" value=" org.hibernate.validator.HibernateValidator"/>
+       	   		<property name="validationMessageSource" ref="messageSource"/>
+       	   </bean>
+       	   
+       	   <!-- 配置校验器数据 -->
+       	   <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource ">
+       	   		<property name="basenames">
+       	   			<list>
+       	   				<value>classpath:MyMessage</value>
+       	   			</list>
+       	   		</property>
+       	   		
+       	   		<property name="fileEncodings" value="utf-8" />
+       	   		<property name="cacheSeconds" value="150"/>
+       	   </bean>
+</beans>

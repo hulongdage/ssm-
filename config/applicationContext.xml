@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:p="http://www.springframework.org/schema/p"
+		xmlns:context="http://www.springframework.org/schema/context" 
+		xmlns:aop="http://www.springframework.org/schema/aop"
+   		xmlns:tx="http://www.springframework.org/schema/tx"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+	        http://www.springframework.org/schema/beans/spring-beans.xsd
+	        http://www.springframework.org/schema/context
+	        http://www.springframework.org/schema/context/spring-context.xsd
+	        http://www.springframework.org/schema/aop
+	        http://www.springframework.org/schema/aop/spring-aop.xsd
+	        http://www.springframework.org/schema/tx
+	        http://www.springframework.org/schema/tx/spring-tx.xsd"><!-- 这是完整约束，以后复制就好 -->
+	
+	<context:property-placeholder location="classpath:db.properties"/>
+	<!-- 配置c3p0连接池，数据源 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${jdbc.driver}"></property>
+		<property name="jdbcUrl" value="${jdbc.url}"></property>
+		<property name="user"  value="${jdbc.name}"></property>
+		<property name="password"  value="${jdbc.password}"></property>
+	</bean>
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="configLocation" value="classpath:SqlMapConfig.xml"></property>
+	</bean>
+	
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- 扫描多个包用,分割开 -->
+		<property name="basePackage" value="com.example.ssm.mapper"></property>
+		<!-- 注意这里是使用sqlSessionFactoryBeanName设置的是value而不是ref（sqlSessionFactoryBeanName是字符串类型的属性） -->
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+	</bean>
+
+    <!-- 基于数据源的事务管理器,这里已经将数据源设置进去了 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"  >
+    	<property name="dataSource" ref="dataSource"></property>
+    </bean>
+	    <!-- 事务增强 -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <!-- 事务属性定义，对所有方法增强-->
+        <tx:attributes>
+            <tx:method name="*" />
+        </tx:attributes>
+    </tx:advice>	
+    <aop:config proxy-target-class="true">
+        <!-- 通过aop定义事务增强切面 -->
+        <aop:pointcut id="serviceMethod"  expression="execution(* com.example.ssm.service.*.*.*(..))"
+            />
+        <!-- 引用事务增强 -->
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="serviceMethod"/>
+    </aop:config>
+
+</beans>
+
